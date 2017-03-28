@@ -17,7 +17,9 @@
     "ui",
     "browser",
     "commonjs",
-    "es"
+    "es",
+    "accordion",
+    "ui"
   ],
   "author": "nju33 <nju33.ki@gmail.com>",
   "license": "MIT",
