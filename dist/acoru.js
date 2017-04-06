@@ -33,9 +33,9 @@ var _cof = function(it){
 };
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = _cof;
+
 var _iobject = Object('z').propertyIsEnumerable(0) ? Object : function(it){
-  return cof(it) == 'String' ? it.split('') : Object(it);
+  return _cof(it) == 'String' ? it.split('') : Object(it);
 };
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -45,10 +45,9 @@ var _defined = function(it){
 };
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = _iobject;
-var defined = _defined;
+
 var _toIobject = function(it){
-  return IObject(defined(it));
+  return _iobject(_defined(it));
 };
 
 var _library = true;
@@ -71,9 +70,9 @@ var _aFunction = function(it){
 };
 
 // optional / simple context binding
-var aFunction = _aFunction;
+
 var _ctx = function(fn, that, length){
-  aFunction(fn);
+  _aFunction(fn);
   if(that === undefined)return fn;
   switch(length){
     case 1: return function(a){
@@ -95,9 +94,8 @@ var _isObject = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
 
-var isObject = _isObject;
 var _anObject = function(it){
-  if(!isObject(it))throw TypeError(it + ' is not an object!');
+  if(!_isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
 
@@ -114,9 +112,8 @@ var _descriptors = !_fails(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
 
-var isObject$1 = _isObject;
 var document$1 = _global.document;
-var is = isObject$1(document$1) && isObject$1(document$1.createElement);
+var is = _isObject(document$1) && _isObject(document$1.createElement);
 var _domCreate = function(it){
   return is ? document$1.createElement(it) : {};
 };
@@ -126,29 +123,26 @@ var _ie8DomDefine = !_descriptors && !_fails(function(){
 });
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject$2 = _isObject;
+
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
 // and the second argument - flag - preferred type is a string
 var _toPrimitive = function(it, S){
-  if(!isObject$2(it))return it;
+  if(!_isObject(it))return it;
   var fn, val;
-  if(S && typeof (fn = it.toString) == 'function' && !isObject$2(val = fn.call(it)))return val;
-  if(typeof (fn = it.valueOf) == 'function' && !isObject$2(val = fn.call(it)))return val;
-  if(!S && typeof (fn = it.toString) == 'function' && !isObject$2(val = fn.call(it)))return val;
+  if(S && typeof (fn = it.toString) == 'function' && !_isObject(val = fn.call(it)))return val;
+  if(typeof (fn = it.valueOf) == 'function' && !_isObject(val = fn.call(it)))return val;
+  if(!S && typeof (fn = it.toString) == 'function' && !_isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
 
-var anObject       = _anObject;
-var IE8_DOM_DEFINE = _ie8DomDefine;
-var toPrimitive    = _toPrimitive;
-var dP$1             = Object.defineProperty;
+var dP             = Object.defineProperty;
 
 var f = _descriptors ? Object.defineProperty : function defineProperty(O, P, Attributes){
-  anObject(O);
-  P = toPrimitive(P, true);
-  anObject(Attributes);
-  if(IE8_DOM_DEFINE)try {
-    return dP$1(O, P, Attributes);
+  _anObject(O);
+  P = _toPrimitive(P, true);
+  _anObject(Attributes);
+  if(_ie8DomDefine)try {
+    return dP(O, P, Attributes);
   } catch(e){ /* empty */ }
   if('get' in Attributes || 'set' in Attributes)throw TypeError('Accessors not supported!');
   if('value' in Attributes)O[P] = Attributes.value;
@@ -168,31 +162,25 @@ var _propertyDesc = function(bitmap, value){
   };
 };
 
-var dP         = _objectDp;
-var createDesc = _propertyDesc;
 var _hide = _descriptors ? function(object, key, value){
-  return dP.f(object, key, createDesc(1, value));
+  return _objectDp.f(object, key, _propertyDesc(1, value));
 } : function(object, key, value){
   object[key] = value;
   return object;
 };
 
-var global$2    = _global;
-var core      = _core;
-var ctx       = _ctx;
-var hide$2      = _hide;
 var PROTOTYPE = 'prototype';
 
-var $export$1 = function(type, name, source){
-  var IS_FORCED = type & $export$1.F
-    , IS_GLOBAL = type & $export$1.G
-    , IS_STATIC = type & $export$1.S
-    , IS_PROTO  = type & $export$1.P
-    , IS_BIND   = type & $export$1.B
-    , IS_WRAP   = type & $export$1.W
-    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
+var $export = function(type, name, source){
+  var IS_FORCED = type & $export.F
+    , IS_GLOBAL = type & $export.G
+    , IS_STATIC = type & $export.S
+    , IS_PROTO  = type & $export.P
+    , IS_BIND   = type & $export.B
+    , IS_WRAP   = type & $export.W
+    , exports   = IS_GLOBAL ? _core : _core[name] || (_core[name] = {})
     , expProto  = exports[PROTOTYPE]
-    , target    = IS_GLOBAL ? global$2 : IS_STATIC ? global$2[name] : (global$2[name] || {})[PROTOTYPE]
+    , target    = IS_GLOBAL ? _global : IS_STATIC ? _global[name] : (_global[name] || {})[PROTOTYPE]
     , key, own, out;
   if(IS_GLOBAL)source = name;
   for(key in source){
@@ -204,7 +192,7 @@ var $export$1 = function(type, name, source){
     // prevent global pollution for namespaces
     exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
     // bind timers to global for call from export context
-    : IS_BIND && own ? ctx(out, global$2)
+    : IS_BIND && own ? _ctx(out, _global)
     // wrap global constructors for prevent change them in library
     : IS_WRAP && target[key] == out ? (function(C){
       var F = function(a, b, c){
@@ -219,25 +207,25 @@ var $export$1 = function(type, name, source){
       F[PROTOTYPE] = C[PROTOTYPE];
       return F;
     // make static versions for prototype methods
-    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
+    })(out) : IS_PROTO && typeof out == 'function' ? _ctx(Function.call, out) : out;
     // export proto methods to core.%CONSTRUCTOR%.methods.%NAME%
     if(IS_PROTO){
       (exports.virtual || (exports.virtual = {}))[key] = out;
       // export proto methods to core.%CONSTRUCTOR%.prototype.%NAME%
-      if(type & $export$1.R && expProto && !expProto[key])hide$2(expProto, key, out);
+      if(type & $export.R && expProto && !expProto[key])_hide(expProto, key, out);
     }
   }
 };
 // type bitmap
-$export$1.F = 1;   // forced
-$export$1.G = 2;   // global
-$export$1.S = 4;   // static
-$export$1.P = 8;   // proto
-$export$1.B = 16;  // bind
-$export$1.W = 32;  // wrap
-$export$1.U = 64;  // safe
-$export$1.R = 128; // real proto method for `library` 
-var _export = $export$1;
+$export.F = 1;   // forced
+$export.G = 2;   // global
+$export.S = 4;   // static
+$export.P = 8;   // proto
+$export.B = 16;  // bind
+$export.W = 32;  // wrap
+$export.U = 64;  // safe
+$export.R = 128; // real proto method for `library` 
+var _export = $export;
 
 var _redefine = _hide;
 
@@ -254,30 +242,26 @@ var _toInteger = function(it){
 };
 
 // 7.1.15 ToLength
-var toInteger = _toInteger;
 var min       = Math.min;
 var _toLength = function(it){
-  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
+  return it > 0 ? min(_toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 };
 
-var toInteger$1 = _toInteger;
 var max       = Math.max;
 var min$1       = Math.min;
 var _toIndex = function(index, length){
-  index = toInteger$1(index);
+  index = _toInteger(index);
   return index < 0 ? max(index + length, 0) : min$1(index, length);
 };
 
 // false -> Array#indexOf
 // true  -> Array#includes
-var toIObject$2 = _toIobject;
-var toLength  = _toLength;
-var toIndex   = _toIndex;
+
 var _arrayIncludes = function(IS_INCLUDES){
   return function($this, el, fromIndex){
-    var O      = toIObject$2($this)
-      , length = toLength(O.length)
-      , index  = toIndex(fromIndex, length)
+    var O      = _toIobject($this)
+      , length = _toLength(O.length)
+      , index  = _toIndex(fromIndex, length)
       , value;
     // Array#includes uses SameValueZero equality algorithm
     if(IS_INCLUDES && el != el)while(length > index){
@@ -290,9 +274,8 @@ var _arrayIncludes = function(IS_INCLUDES){
   };
 };
 
-var global$3 = _global;
 var SHARED = '__core-js_shared__';
-var store  = global$3[SHARED] || (global$3[SHARED] = {});
+var store  = _global[SHARED] || (_global[SHARED] = {});
 var _shared = function(key){
   return store[key] || (store[key] = {});
 };
@@ -304,24 +287,21 @@ var _uid = function(key){
 };
 
 var shared = _shared('keys');
-var uid    = _uid;
 var _sharedKey = function(key){
-  return shared[key] || (shared[key] = uid(key));
+  return shared[key] || (shared[key] = _uid(key));
 };
 
-var has$2          = _has;
-var toIObject$1    = _toIobject;
 var arrayIndexOf = _arrayIncludes(false);
 var IE_PROTO$1     = _sharedKey('IE_PROTO');
 
 var _objectKeysInternal = function(object, names){
-  var O      = toIObject$1(object)
+  var O      = _toIobject(object)
     , i      = 0
     , result = []
     , key;
-  for(key in O)if(key != IE_PROTO$1)has$2(O, key) && result.push(key);
+  for(key in O)if(key != IE_PROTO$1)_has(O, key) && result.push(key);
   // Don't enum bug & hidden keys
-  while(names.length > i)if(has$2(O, key = names[i++])){
+  while(names.length > i)if(_has(O, key = names[i++])){
     ~arrayIndexOf(result, key) || result.push(key);
   }
   return result;
@@ -333,33 +313,25 @@ var _enumBugKeys = (
 ).split(',');
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys       = _objectKeysInternal;
-var enumBugKeys$1 = _enumBugKeys;
+
 
 var _objectKeys = Object.keys || function keys(O){
-  return $keys(O, enumBugKeys$1);
+  return _objectKeysInternal(O, _enumBugKeys);
 };
 
-var dP$2       = _objectDp;
-var anObject$2 = _anObject;
-var getKeys  = _objectKeys;
-
 var _objectDps = _descriptors ? Object.defineProperties : function defineProperties(O, Properties){
-  anObject$2(O);
-  var keys   = getKeys(Properties)
+  _anObject(O);
+  var keys   = _objectKeys(Properties)
     , length = keys.length
     , i = 0
     , P;
-  while(length > i)dP$2.f(O, P = keys[i++], Properties[P]);
+  while(length > i)_objectDp.f(O, P = keys[i++], Properties[P]);
   return O;
 };
 
 var _html = _global.document && document.documentElement;
 
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-var anObject$1    = _anObject;
-var dPs         = _objectDps;
-var enumBugKeys = _enumBugKeys;
 var IE_PROTO    = _sharedKey('IE_PROTO');
 var Empty       = function(){ /* empty */ };
 var PROTOTYPE$1   = 'prototype';
@@ -368,7 +340,7 @@ var PROTOTYPE$1   = 'prototype';
 var createDict = function(){
   // Thrash, waste and sodomy: IE GC bug
   var iframe = _domCreate('iframe')
-    , i      = enumBugKeys.length
+    , i      = _enumBugKeys.length
     , lt     = '<'
     , gt     = '>'
     , iframeDocument;
@@ -382,86 +354,70 @@ var createDict = function(){
   iframeDocument.write(lt + 'script' + gt + 'document.F=Object' + lt + '/script' + gt);
   iframeDocument.close();
   createDict = iframeDocument.F;
-  while(i--)delete createDict[PROTOTYPE$1][enumBugKeys[i]];
+  while(i--)delete createDict[PROTOTYPE$1][_enumBugKeys[i]];
   return createDict();
 };
 
 var _objectCreate = Object.create || function create(O, Properties){
   var result;
   if(O !== null){
-    Empty[PROTOTYPE$1] = anObject$1(O);
+    Empty[PROTOTYPE$1] = _anObject(O);
     result = new Empty;
     Empty[PROTOTYPE$1] = null;
     // add "__proto__" for Object.getPrototypeOf polyfill
     result[IE_PROTO] = O;
   } else result = createDict();
-  return Properties === undefined ? result : dPs(result, Properties);
+  return Properties === undefined ? result : _objectDps(result, Properties);
 };
 
 var _wks = createCommonjsModule(function (module) {
 var store      = _shared('wks')
-  , uid        = _uid
   , Symbol     = _global.Symbol
   , USE_SYMBOL = typeof Symbol == 'function';
 
 var $exports = module.exports = function(name){
   return store[name] || (store[name] =
-    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
+    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : _uid)('Symbol.' + name));
 };
 
 $exports.store = store;
 });
 
 var def = _objectDp.f;
-var has$3 = _has;
 var TAG = _wks('toStringTag');
 
 var _setToStringTag = function(it, tag, stat){
-  if(it && !has$3(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
+  if(it && !_has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
 };
 
-var create$1         = _objectCreate;
-var descriptor     = _propertyDesc;
-var setToStringTag$1 = _setToStringTag;
 var IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
 _hide(IteratorPrototype, _wks('iterator'), function(){ return this; });
 
 var _iterCreate = function(Constructor, NAME, next){
-  Constructor.prototype = create$1(IteratorPrototype, {next: descriptor(1, next)});
-  setToStringTag$1(Constructor, NAME + ' Iterator');
+  Constructor.prototype = _objectCreate(IteratorPrototype, {next: _propertyDesc(1, next)});
+  _setToStringTag(Constructor, NAME + ' Iterator');
 };
 
 // 7.1.13 ToObject(argument)
-var defined$1 = _defined;
+
 var _toObject = function(it){
-  return Object(defined$1(it));
+  return Object(_defined(it));
 };
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
-var has$4         = _has;
-var toObject    = _toObject;
 var IE_PROTO$2    = _sharedKey('IE_PROTO');
 var ObjectProto = Object.prototype;
 
 var _objectGpo = Object.getPrototypeOf || function(O){
-  O = toObject(O);
-  if(has$4(O, IE_PROTO$2))return O[IE_PROTO$2];
+  O = _toObject(O);
+  if(_has(O, IE_PROTO$2))return O[IE_PROTO$2];
   if(typeof O.constructor == 'function' && O instanceof O.constructor){
     return O.constructor.prototype;
   } return O instanceof Object ? ObjectProto : null;
 };
 
-var LIBRARY        = _library;
-var $export        = _export;
-var redefine       = _redefine;
-var hide$1           = _hide;
-var has$1            = _has;
-var Iterators$2      = _iterators;
-var $iterCreate    = _iterCreate;
-var setToStringTag = _setToStringTag;
-var getPrototypeOf = _objectGpo;
 var ITERATOR       = _wks('iterator');
 var BUGGY          = !([].keys && 'next' in [].keys());
 var FF_ITERATOR    = '@@iterator';
@@ -471,7 +427,7 @@ var VALUES         = 'values';
 var returnThis = function(){ return this; };
 
 var _iterDefine = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED){
-  $iterCreate(Constructor, NAME, next);
+  _iterCreate(Constructor, NAME, next);
   var getMethod = function(kind){
     if(!BUGGY && kind in proto)return proto[kind];
     switch(kind){
@@ -490,12 +446,12 @@ var _iterDefine = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
     , methods, key, IteratorPrototype;
   // Fix native
   if($anyNative){
-    IteratorPrototype = getPrototypeOf($anyNative.call(new Base));
+    IteratorPrototype = _objectGpo($anyNative.call(new Base));
     if(IteratorPrototype !== Object.prototype){
       // Set @@toStringTag to native iterators
-      setToStringTag(IteratorPrototype, TAG, true);
+      _setToStringTag(IteratorPrototype, TAG, true);
       // fix for some old engines
-      if(!LIBRARY && !has$1(IteratorPrototype, ITERATOR))hide$1(IteratorPrototype, ITERATOR, returnThis);
+      if(!_library && !_has(IteratorPrototype, ITERATOR))_hide(IteratorPrototype, ITERATOR, returnThis);
     }
   }
   // fix Array#{values, @@iterator}.name in V8 / FF
@@ -504,12 +460,12 @@ var _iterDefine = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
     $default = function values(){ return $native.call(this); };
   }
   // Define iterator
-  if((!LIBRARY || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])){
-    hide$1(proto, ITERATOR, $default);
+  if((!_library || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])){
+    _hide(proto, ITERATOR, $default);
   }
   // Plug for library
-  Iterators$2[NAME] = $default;
-  Iterators$2[TAG]  = returnThis;
+  _iterators[NAME] = $default;
+  _iterators[TAG]  = returnThis;
   if(DEFAULT){
     methods = {
       values:  DEF_VALUES ? $default : getMethod(VALUES),
@@ -517,23 +473,18 @@ var _iterDefine = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
       entries: $entries
     };
     if(FORCED)for(key in methods){
-      if(!(key in proto))redefine(proto, key, methods[key]);
-    } else $export($export.P + $export.F * (BUGGY || VALUES_BUG), NAME, methods);
+      if(!(key in proto))_redefine(proto, key, methods[key]);
+    } else _export(_export.P + _export.F * (BUGGY || VALUES_BUG), NAME, methods);
   }
   return methods;
 };
-
-var addToUnscopables = _addToUnscopables;
-var step             = _iterStep;
-var Iterators$1        = _iterators;
-var toIObject        = _toIobject;
 
 // 22.1.3.4 Array.prototype.entries()
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
 // 22.1.3.30 Array.prototype[@@iterator]()
 var es6_array_iterator = _iterDefine(Array, 'Array', function(iterated, kind){
-  this._t = toIObject(iterated); // target
+  this._t = _toIobject(iterated); // target
   this._i = 0;                   // next index
   this._k = kind;                // kind
 // 22.1.5.2.1 %ArrayIteratorPrototype%.next()
@@ -543,41 +494,36 @@ var es6_array_iterator = _iterDefine(Array, 'Array', function(iterated, kind){
     , index = this._i++;
   if(!O || index >= O.length){
     this._t = undefined;
-    return step(1);
+    return _iterStep(1);
   }
-  if(kind == 'keys'  )return step(0, index);
-  if(kind == 'values')return step(0, O[index]);
-  return step(0, [index, O[index]]);
+  if(kind == 'keys'  )return _iterStep(0, index);
+  if(kind == 'values')return _iterStep(0, O[index]);
+  return _iterStep(0, [index, O[index]]);
 }, 'values');
 
 // argumentsList[@@iterator] is %ArrayProto_values% (9.4.4.6, 9.4.4.7)
-Iterators$1.Arguments = Iterators$1.Array;
+_iterators.Arguments = _iterators.Array;
 
-addToUnscopables('keys');
-addToUnscopables('values');
-addToUnscopables('entries');
+_addToUnscopables('keys');
+_addToUnscopables('values');
+_addToUnscopables('entries');
 
-var global$1        = _global;
-var hide          = _hide;
-var Iterators     = _iterators;
 var TO_STRING_TAG = _wks('toStringTag');
 
 for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList', 'CSSRuleList'], i = 0; i < 5; i++){
   var NAME       = collections[i]
-    , Collection = global$1[NAME]
+    , Collection = _global[NAME]
     , proto      = Collection && Collection.prototype;
-  if(proto && !proto[TO_STRING_TAG])hide(proto, TO_STRING_TAG, NAME);
-  Iterators[NAME] = Iterators.Array;
+  if(proto && !proto[TO_STRING_TAG])_hide(proto, TO_STRING_TAG, NAME);
+  _iterators[NAME] = _iterators.Array;
 }
 
-var toInteger$2 = _toInteger;
-var defined$2   = _defined;
 // true  -> String#at
 // false -> String#codePointAt
 var _stringAt = function(TO_STRING){
   return function(that, pos){
-    var s = String(defined$2(that))
-      , i = toInteger$2(pos)
+    var s = String(_defined(that))
+      , i = _toInteger(pos)
       , l = s.length
       , a, b;
     if(i < 0 || i >= l)return TO_STRING ? '' : undefined;
@@ -606,9 +552,8 @@ _iterDefine(String, 'String', function(iterated){
 });
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
-var cof$1 = _cof;
 var TAG$1 = _wks('toStringTag');
-var ARG = cof$1(function(){ return arguments; }()) == 'Arguments';
+var ARG = _cof(function(){ return arguments; }()) == 'Arguments';
 
 // fallback for IE11 Script Access Denied error
 var tryGet = function(it, key){
@@ -623,26 +568,22 @@ var _classof = function(it){
     // @@toStringTag case
     : typeof (T = tryGet(O = Object(it), TAG$1)) == 'string' ? T
     // builtinTag case
-    : ARG ? cof$1(O)
+    : ARG ? _cof(O)
     // ES3 arguments fallback
-    : (B = cof$1(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
+    : (B = _cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
 };
 
-var classof   = _classof;
 var ITERATOR$1  = _wks('iterator');
-var Iterators$3 = _iterators;
 var core_getIteratorMethod = _core.getIteratorMethod = function(it){
   if(it != undefined)return it[ITERATOR$1]
     || it['@@iterator']
-    || Iterators$3[classof(it)];
+    || _iterators[_classof(it)];
 };
 
-var anObject$3 = _anObject;
-var get$1      = core_getIteratorMethod;
 var core_getIterator = _core.getIterator = function(it){
-  var iterFn = get$1(it);
+  var iterFn = core_getIteratorMethod(it);
   if(typeof iterFn != 'function')throw TypeError(it + ' is not iterable!');
-  return anObject$3(iterFn.call(it));
+  return _anObject(iterFn.call(it));
 };
 
 var getIterator$1 = core_getIterator;
@@ -667,17 +608,16 @@ exports.default = function (instance, Constructor) {
 
 var _classCallCheck = unwrapExports(classCallCheck);
 
-var $export$2 = _export;
 // 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
-$export$2($export$2.S + $export$2.F * !_descriptors, 'Object', {defineProperty: _objectDp.f});
+_export(_export.S + _export.F * !_descriptors, 'Object', {defineProperty: _objectDp.f});
 
 var $Object = _core.Object;
-var defineProperty$3 = function defineProperty$3(it, key, desc){
+var defineProperty$2 = function defineProperty(it, key, desc){
   return $Object.defineProperty(it, key, desc);
 };
 
-var defineProperty$1 = createCommonjsModule(function (module) {
-module.exports = { "default": defineProperty$3, __esModule: true };
+var defineProperty = createCommonjsModule(function (module) {
+module.exports = { "default": defineProperty$2, __esModule: true };
 });
 
 var createClass = createCommonjsModule(function (module, exports) {
@@ -685,9 +625,9 @@ var createClass = createCommonjsModule(function (module, exports) {
 
 exports.__esModule = true;
 
-var _defineProperty = defineProperty$1;
 
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+var _defineProperty2 = _interopRequireDefault(defineProperty);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -712,14 +652,14 @@ exports.default = function () {
 
 var _createClass = unwrapExports(createClass);
 
-var defineProperty$5 = createCommonjsModule(function (module, exports) {
+var defineProperty$4 = createCommonjsModule(function (module, exports) {
 "use strict";
 
 exports.__esModule = true;
 
-var _defineProperty = defineProperty$1;
 
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+var _defineProperty2 = _interopRequireDefault(defineProperty);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -739,7 +679,7 @@ exports.default = function (obj, key, value) {
 };
 });
 
-var _defineProperty = unwrapExports(defineProperty$5);
+var _defineProperty$1 = unwrapExports(defineProperty$4);
 
 var f$1 = Object.getOwnPropertySymbols;
 
@@ -754,11 +694,6 @@ var _objectPie = {
 };
 
 // 19.1.2.1 Object.assign(target, source, ...)
-var getKeys$1  = _objectKeys;
-var gOPS     = _objectGops;
-var pIE      = _objectPie;
-var toObject$1 = _toObject;
-var IObject$1  = _iobject;
 var $assign  = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
@@ -771,14 +706,14 @@ var _objectAssign = !$assign || _fails(function(){
   K.split('').forEach(function(k){ B[k] = k; });
   return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
 }) ? function assign(target, source){ // eslint-disable-line no-unused-vars
-  var T     = toObject$1(target)
+  var T     = _toObject(target)
     , aLen  = arguments.length
     , index = 1
-    , getSymbols = gOPS.f
-    , isEnum     = pIE.f;
+    , getSymbols = _objectGops.f
+    , isEnum     = _objectPie.f;
   while(aLen > index){
-    var S      = IObject$1(arguments[index++])
-      , keys   = getSymbols ? getKeys$1(S).concat(getSymbols(S)) : getKeys$1(S)
+    var S      = _iobject(arguments[index++])
+      , keys   = getSymbols ? _objectKeys(S).concat(getSymbols(S)) : _objectKeys(S)
       , length = keys.length
       , j      = 0
       , key;
@@ -787,35 +722,33 @@ var _objectAssign = !$assign || _fails(function(){
 } : $assign;
 
 // 19.1.3.1 Object.assign(target, source)
-var $export$3 = _export;
 
-$export$3($export$3.S + $export$3.F, 'Object', {assign: _objectAssign});
 
-var assign$2 = _core.Object.assign;
+_export(_export.S + _export.F, 'Object', {assign: _objectAssign});
 
-var assign$1 = createCommonjsModule(function (module) {
-module.exports = { "default": assign$2, __esModule: true };
+var assign$1 = _core.Object.assign;
+
+var assign = createCommonjsModule(function (module) {
+module.exports = { "default": assign$1, __esModule: true };
 });
 
-var _Object$assign = unwrapExports(assign$1);
+var _Object$assign = unwrapExports(assign);
 
 // 7.2.2 IsArray(argument)
-var cof$2 = _cof;
+
 var _isArray = Array.isArray || function isArray(arg){
-  return cof$2(arg) == 'Array';
+  return _cof(arg) == 'Array';
 };
 
-var isObject$3 = _isObject;
-var isArray$1  = _isArray;
 var SPECIES  = _wks('species');
 
 var _arraySpeciesConstructor = function(original){
   var C;
-  if(isArray$1(original)){
+  if(_isArray(original)){
     C = original.constructor;
     // cross-realm fallback
-    if(typeof C == 'function' && (C === Array || isArray$1(C.prototype)))C = undefined;
-    if(isObject$3(C)){
+    if(typeof C == 'function' && (C === Array || _isArray(C.prototype)))C = undefined;
+    if(_isObject(C)){
       C = C[SPECIES];
       if(C === null)C = undefined;
     }
@@ -823,10 +756,10 @@ var _arraySpeciesConstructor = function(original){
 };
 
 // 9.4.2.3 ArraySpeciesCreate(originalArray, length)
-var speciesConstructor = _arraySpeciesConstructor;
+
 
 var _arraySpeciesCreate = function(original, length){
-  return new (speciesConstructor(original))(length);
+  return new (_arraySpeciesConstructor(original))(length);
 };
 
 // 0 -> Array#forEach
@@ -836,11 +769,7 @@ var _arraySpeciesCreate = function(original, length){
 // 4 -> Array#every
 // 5 -> Array#find
 // 6 -> Array#findIndex
-var ctx$1      = _ctx;
-var IObject$2  = _iobject;
-var toObject$2 = _toObject;
-var toLength$1 = _toLength;
-var asc      = _arraySpeciesCreate;
+
 var _arrayMethods = function(TYPE, $create){
   var IS_MAP        = TYPE == 1
     , IS_FILTER     = TYPE == 2
@@ -848,12 +777,12 @@ var _arrayMethods = function(TYPE, $create){
     , IS_EVERY      = TYPE == 4
     , IS_FIND_INDEX = TYPE == 6
     , NO_HOLES      = TYPE == 5 || IS_FIND_INDEX
-    , create        = $create || asc;
+    , create        = $create || _arraySpeciesCreate;
   return function($this, callbackfn, that){
-    var O      = toObject$2($this)
-      , self   = IObject$2(O)
-      , f      = ctx$1(callbackfn, that, 3)
-      , length = toLength$1(self.length)
+    var O      = _toObject($this)
+      , self   = _iobject(O)
+      , f      = _ctx(callbackfn, that, 3)
+      , length = _toLength(self.length)
       , index  = 0
       , result = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined
       , val, res;
@@ -876,8 +805,6 @@ var _arrayMethods = function(TYPE, $create){
 
 var _meta = createCommonjsModule(function (module) {
 var META     = _uid('meta')
-  , isObject = _isObject
-  , has      = _has
   , setDesc  = _objectDp.f
   , id       = 0;
 var isExtensible = Object.isExtensible || function(){
@@ -894,8 +821,8 @@ var setMeta = function(it){
 };
 var fastKey = function(it, create){
   // return primitive with prefix
-  if(!isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if(!has(it, META)){
+  if(!_isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if(!_has(it, META)){
     // can't set metadata to uncaught frozen object
     if(!isExtensible(it))return 'F';
     // not necessary to add metadata
@@ -906,7 +833,7 @@ var fastKey = function(it, create){
   } return it[META].i;
 };
 var getWeak = function(it, create){
-  if(!has(it, META)){
+  if(!_has(it, META)){
     // can't set metadata to uncaught frozen object
     if(!isExtensible(it))return true;
     // not necessary to add metadata
@@ -918,7 +845,7 @@ var getWeak = function(it, create){
 };
 // add metadata on freeze-family methods calling
 var onFreeze = function(it){
-  if(FREEZE && meta.NEED && isExtensible(it) && !has(it, META))setMeta(it);
+  if(FREEZE && meta.NEED && isExtensible(it) && !_has(it, META))setMeta(it);
   return it;
 };
 var meta = module.exports = {
@@ -930,11 +857,10 @@ var meta = module.exports = {
 };
 });
 
-var hide$3 = _hide;
 var _redefineAll = function(target, src, safe){
   for(var key in src){
     if(safe && target[key])target[key] = src[key];
-    else hide$3(target, key, src[key]);
+    else _hide(target, key, src[key]);
   } return target;
 };
 
@@ -945,48 +871,41 @@ var _anInstance = function(it, Constructor, name, forbiddenField){
 };
 
 // call something on iterator step with safe closing on error
-var anObject$5 = _anObject;
+
 var _iterCall = function(iterator, fn, value, entries){
   try {
-    return entries ? fn(anObject$5(value)[0], value[1]) : fn(value);
+    return entries ? fn(_anObject(value)[0], value[1]) : fn(value);
   // 7.4.6 IteratorClose(iterator, completion)
   } catch(e){
     var ret = iterator['return'];
-    if(ret !== undefined)anObject$5(ret.call(iterator));
+    if(ret !== undefined)_anObject(ret.call(iterator));
     throw e;
   }
 };
 
 // check on default Array iterator
-var Iterators$4  = _iterators;
 var ITERATOR$2   = _wks('iterator');
 var ArrayProto = Array.prototype;
 
 var _isArrayIter = function(it){
-  return it !== undefined && (Iterators$4.Array === it || ArrayProto[ITERATOR$2] === it);
+  return it !== undefined && (_iterators.Array === it || ArrayProto[ITERATOR$2] === it);
 };
 
 var _forOf = createCommonjsModule(function (module) {
-var ctx         = _ctx
-  , call        = _iterCall
-  , isArrayIter = _isArrayIter
-  , anObject    = _anObject
-  , toLength    = _toLength
-  , getIterFn   = core_getIteratorMethod
-  , BREAK       = {}
+var BREAK       = {}
   , RETURN      = {};
 var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
-  var iterFn = ITERATOR ? function(){ return iterable; } : getIterFn(iterable)
-    , f      = ctx(fn, that, entries ? 2 : 1)
+  var iterFn = ITERATOR ? function(){ return iterable; } : core_getIteratorMethod(iterable)
+    , f      = _ctx(fn, that, entries ? 2 : 1)
     , index  = 0
     , length, step, iterator, result;
   if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
   // fast case for arrays with default iterator
-  if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
-    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
+  if(_isArrayIter(iterFn))for(length = _toLength(iterable.length); length > index; index++){
+    result = entries ? f(_anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
     if(result === BREAK || result === RETURN)return result;
   } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
-    result = call(iterator, f, step.value, entries);
+    result = _iterCall(iterator, f, step.value, entries);
     if(result === BREAK || result === RETURN)return result;
   }
 };
@@ -994,16 +913,9 @@ exports.BREAK  = BREAK;
 exports.RETURN = RETURN;
 });
 
-var redefineAll       = _redefineAll;
 var getWeak           = _meta.getWeak;
-var anObject$4          = _anObject;
-var isObject$4          = _isObject;
-var anInstance        = _anInstance;
-var forOf             = _forOf;
-var createArrayMethod = _arrayMethods;
-var $has              = _has;
-var arrayFind         = createArrayMethod(5);
-var arrayFindIndex    = createArrayMethod(6);
+var arrayFind         = _arrayMethods(5);
+var arrayFindIndex    = _arrayMethods(6);
 var id$1                = 0;
 
 // fallback for uncaught frozen keys
@@ -1043,33 +955,33 @@ UncaughtFrozenStore.prototype = {
 var _collectionWeak = {
   getConstructor: function(wrapper, NAME, IS_MAP, ADDER){
     var C = wrapper(function(that, iterable){
-      anInstance(that, C, NAME, '_i');
+      _anInstance(that, C, NAME, '_i');
       that._i = id$1++;      // collection id
       that._l = undefined; // leak store for uncaught frozen objects
-      if(iterable != undefined)forOf(iterable, IS_MAP, that[ADDER], that);
+      if(iterable != undefined)_forOf(iterable, IS_MAP, that[ADDER], that);
     });
-    redefineAll(C.prototype, {
+    _redefineAll(C.prototype, {
       // 23.3.3.2 WeakMap.prototype.delete(key)
       // 23.4.3.3 WeakSet.prototype.delete(value)
       'delete': function(key){
-        if(!isObject$4(key))return false;
+        if(!_isObject(key))return false;
         var data = getWeak(key);
         if(data === true)return uncaughtFrozenStore(this)['delete'](key);
-        return data && $has(data, this._i) && delete data[this._i];
+        return data && _has(data, this._i) && delete data[this._i];
       },
       // 23.3.3.4 WeakMap.prototype.has(key)
       // 23.4.3.4 WeakSet.prototype.has(value)
       has: function has(key){
-        if(!isObject$4(key))return false;
+        if(!_isObject(key))return false;
         var data = getWeak(key);
         if(data === true)return uncaughtFrozenStore(this).has(key);
-        return data && $has(data, this._i);
+        return data && _has(data, this._i);
       }
     });
     return C;
   },
   def: function(that, key, value){
-    var data = getWeak(anObject$4(key), true);
+    var data = getWeak(_anObject(key), true);
     if(data === true)uncaughtFrozenStore(that).set(key, value);
     else data[that._i] = value;
     return that;
@@ -1077,59 +989,48 @@ var _collectionWeak = {
   ufstore: uncaughtFrozenStore
 };
 
-var global$4         = _global;
-var $export$4        = _export;
-var meta           = _meta;
-var fails          = _fails;
-var hide$4           = _hide;
-var redefineAll$1    = _redefineAll;
-var forOf$1          = _forOf;
-var anInstance$1     = _anInstance;
-var isObject$5       = _isObject;
-var setToStringTag$2 = _setToStringTag;
-var dP$3             = _objectDp.f;
+var dP$1             = _objectDp.f;
 var each           = _arrayMethods(0);
-var DESCRIPTORS    = _descriptors;
 
 var _collection = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
-  var Base  = global$4[NAME]
+  var Base  = _global[NAME]
     , C     = Base
     , ADDER = IS_MAP ? 'set' : 'add'
     , proto = C && C.prototype
     , O     = {};
-  if(!DESCRIPTORS || typeof C != 'function' || !(IS_WEAK || proto.forEach && !fails(function(){
+  if(!_descriptors || typeof C != 'function' || !(IS_WEAK || proto.forEach && !_fails(function(){
     new C().entries().next();
   }))){
     // create collection constructor
     C = common.getConstructor(wrapper, NAME, IS_MAP, ADDER);
-    redefineAll$1(C.prototype, methods);
-    meta.NEED = true;
+    _redefineAll(C.prototype, methods);
+    _meta.NEED = true;
   } else {
     C = wrapper(function(target, iterable){
-      anInstance$1(target, C, NAME, '_c');
+      _anInstance(target, C, NAME, '_c');
       target._c = new Base;
-      if(iterable != undefined)forOf$1(iterable, IS_MAP, target[ADDER], target);
+      if(iterable != undefined)_forOf(iterable, IS_MAP, target[ADDER], target);
     });
     each('add,clear,delete,forEach,get,has,set,keys,values,entries,toJSON'.split(','),function(KEY){
       var IS_ADDER = KEY == 'add' || KEY == 'set';
-      if(KEY in proto && !(IS_WEAK && KEY == 'clear'))hide$4(C.prototype, KEY, function(a, b){
-        anInstance$1(this, C, KEY);
-        if(!IS_ADDER && IS_WEAK && !isObject$5(a))return KEY == 'get' ? undefined : false;
+      if(KEY in proto && !(IS_WEAK && KEY == 'clear'))_hide(C.prototype, KEY, function(a, b){
+        _anInstance(this, C, KEY);
+        if(!IS_ADDER && IS_WEAK && !_isObject(a))return KEY == 'get' ? undefined : false;
         var result = this._c[KEY](a === 0 ? 0 : a, b);
         return IS_ADDER ? this : result;
       });
     });
-    if('size' in proto)dP$3(C.prototype, 'size', {
+    if('size' in proto)dP$1(C.prototype, 'size', {
       get: function(){
         return this._c.size;
       }
     });
   }
 
-  setToStringTag$2(C, NAME);
+  _setToStringTag(C, NAME);
 
   O[NAME] = C;
-  $export$4($export$4.G + $export$4.W + $export$4.F, O);
+  _export(_export.G + _export.W + _export.F, O);
 
   if(!IS_WEAK)common.setStrong(C, NAME, IS_MAP);
 
@@ -1139,14 +1040,9 @@ var _collection = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
 var es6_weakMap = createCommonjsModule(function (module) {
 'use strict';
 var each         = _arrayMethods(0)
-  , redefine     = _redefine
-  , meta         = _meta
-  , assign       = _objectAssign
-  , weak         = _collectionWeak
-  , isObject     = _isObject
-  , getWeak      = meta.getWeak
+  , getWeak      = _meta.getWeak
   , isExtensible = Object.isExtensible
-  , uncaughtFrozenStore = weak.ufstore
+  , uncaughtFrozenStore = _collectionWeak.ufstore
   , tmp          = {}
   , InternalMap;
 
@@ -1159,7 +1055,7 @@ var wrapper = function(get){
 var methods = {
   // 23.3.3.3 WeakMap.prototype.get(key)
   get: function get(key){
-    if(isObject(key)){
+    if(_isObject(key)){
       var data = getWeak(key);
       if(data === true)return uncaughtFrozenStore(this).get(key);
       return data ? data[this._i] : undefined;
@@ -1167,24 +1063,24 @@ var methods = {
   },
   // 23.3.3.5 WeakMap.prototype.set(key, value)
   set: function set(key, value){
-    return weak.def(this, key, value);
+    return _collectionWeak.def(this, key, value);
   }
 };
 
 // 23.3 WeakMap Objects
-var $WeakMap = module.exports = _collection('WeakMap', wrapper, methods, weak, true, true);
+var $WeakMap = module.exports = _collection('WeakMap', wrapper, methods, _collectionWeak, true, true);
 
 // IE11 WeakMap frozen keys fix
 if(new $WeakMap().set((Object.freeze || Object)(tmp), 7).get(tmp) != 7){
-  InternalMap = weak.getConstructor(wrapper);
-  assign(InternalMap.prototype, methods);
-  meta.NEED = true;
+  InternalMap = _collectionWeak.getConstructor(wrapper);
+  _objectAssign(InternalMap.prototype, methods);
+  _meta.NEED = true;
   each(['delete', 'has', 'get', 'set'], function(key){
     var proto  = $WeakMap.prototype
       , method = proto[key];
-    redefine(proto, key, function(a, b){
+    _redefine(proto, key, function(a, b){
       // store frozen objects on internal weakmap shim
-      if(isObject(a) && !isExtensible(a)){
+      if(_isObject(a) && !isExtensible(a)){
         if(!this._f)this._f = new InternalMap;
         var result = this._f[key](a, b);
         return key == 'set' ? this : result;
@@ -1243,13 +1139,11 @@ function match(el, selector) {
   return false;
 }
 
-var matches = index$1;
-
 var index = function (element, selector, checkYoSelf) {
   var parent = checkYoSelf ? element : element.parentNode;
 
   while (parent && parent !== document) {
-    if (matches(parent, selector)) return parent;
+    if (index$1(parent, selector)) return parent;
     parent = parent.parentNode;
   }
 };
@@ -1279,29 +1173,25 @@ var index = function (element, selector, checkYoSelf) {
  * _.isObject(null);
  * // => false
  */
-function isObject$8(value) {
+function isObject$1(value) {
   var type = typeof value;
   return value != null && (type == 'object' || type == 'function');
 }
 
-var isObject_1 = isObject$8;
+var isObject_1 = isObject$1;
 
 /** Detect free variable `global` from Node.js. */
-var freeGlobal$1 = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
 
-var _freeGlobal = freeGlobal$1;
-
-var freeGlobal = _freeGlobal;
+var _freeGlobal = freeGlobal;
 
 /** Detect free variable `self`. */
 var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
 /** Used as a reference to the global object. */
-var root$1 = freeGlobal || freeSelf || Function('return this')();
+var root = _freeGlobal || freeSelf || Function('return this')();
 
-var _root = root$1;
-
-var root = _root;
+var _root = root;
 
 /**
  * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -1319,20 +1209,16 @@ var root = _root;
  * }, _.now());
  * // => Logs the number of milliseconds it took for the deferred invocation.
  */
-var now$1 = function() {
-  return root.Date.now();
+var now = function() {
+  return _root.Date.now();
 };
 
-var now_1 = now$1;
-
-var root$2 = _root;
+var now_1 = now;
 
 /** Built-in value references. */
-var Symbol$2 = root$2.Symbol;
+var Symbol$1 = _root.Symbol;
 
-var _Symbol = Symbol$2;
-
-var Symbol$3 = _Symbol;
+var _Symbol = Symbol$1;
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -1348,7 +1234,7 @@ var hasOwnProperty$1 = objectProto.hasOwnProperty;
 var nativeObjectToString = objectProto.toString;
 
 /** Built-in value references. */
-var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
+var symToStringTag$1 = _Symbol ? _Symbol.toStringTag : undefined;
 
 /**
  * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
@@ -1357,7 +1243,7 @@ var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
  * @param {*} value The value to query.
  * @returns {string} Returns the raw `toStringTag`.
  */
-function getRawTag$1(value) {
+function getRawTag(value) {
   var isOwn = hasOwnProperty$1.call(value, symToStringTag$1),
       tag = value[symToStringTag$1];
 
@@ -1377,7 +1263,7 @@ function getRawTag$1(value) {
   return result;
 }
 
-var _getRawTag = getRawTag$1;
+var _getRawTag = getRawTag;
 
 /** Used for built-in method references. */
 var objectProto$1 = Object.prototype;
@@ -1396,22 +1282,18 @@ var nativeObjectToString$1 = objectProto$1.toString;
  * @param {*} value The value to convert.
  * @returns {string} Returns the converted string.
  */
-function objectToString$1(value) {
+function objectToString(value) {
   return nativeObjectToString$1.call(value);
 }
 
-var _objectToString = objectToString$1;
-
-var Symbol$1 = _Symbol;
-var getRawTag = _getRawTag;
-var objectToString = _objectToString;
+var _objectToString = objectToString;
 
 /** `Object#toString` result references. */
 var nullTag = '[object Null]';
 var undefinedTag = '[object Undefined]';
 
 /** Built-in value references. */
-var symToStringTag = Symbol$1 ? Symbol$1.toStringTag : undefined;
+var symToStringTag = _Symbol ? _Symbol.toStringTag : undefined;
 
 /**
  * The base implementation of `getTag` without fallbacks for buggy environments.
@@ -1420,16 +1302,16 @@ var symToStringTag = Symbol$1 ? Symbol$1.toStringTag : undefined;
  * @param {*} value The value to query.
  * @returns {string} Returns the `toStringTag`.
  */
-function baseGetTag$1(value) {
+function baseGetTag(value) {
   if (value == null) {
     return value === undefined ? undefinedTag : nullTag;
   }
   return (symToStringTag && symToStringTag in Object(value))
-    ? getRawTag(value)
-    : objectToString(value);
+    ? _getRawTag(value)
+    : _objectToString(value);
 }
 
-var _baseGetTag = baseGetTag$1;
+var _baseGetTag = baseGetTag;
 
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
@@ -1455,14 +1337,11 @@ var _baseGetTag = baseGetTag$1;
  * _.isObjectLike(null);
  * // => false
  */
-function isObjectLike$1(value) {
+function isObjectLike(value) {
   return value != null && typeof value == 'object';
 }
 
-var isObjectLike_1 = isObjectLike$1;
-
-var baseGetTag = _baseGetTag;
-var isObjectLike = isObjectLike_1;
+var isObjectLike_1 = isObjectLike;
 
 /** `Object#toString` result references. */
 var symbolTag = '[object Symbol]';
@@ -1484,15 +1363,12 @@ var symbolTag = '[object Symbol]';
  * _.isSymbol('abc');
  * // => false
  */
-function isSymbol$1(value) {
+function isSymbol(value) {
   return typeof value == 'symbol' ||
-    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+    (isObjectLike_1(value) && _baseGetTag(value) == symbolTag);
 }
 
-var isSymbol_1 = isSymbol$1;
-
-var isObject$9 = isObject_1;
-var isSymbol = isSymbol_1;
+var isSymbol_1 = isSymbol;
 
 /** Used as references for various `Number` constants. */
 var NAN = 0 / 0;
@@ -1535,16 +1411,16 @@ var freeParseInt = parseInt;
  * _.toNumber('3.2');
  * // => 3.2
  */
-function toNumber$1(value) {
+function toNumber(value) {
   if (typeof value == 'number') {
     return value;
   }
-  if (isSymbol(value)) {
+  if (isSymbol_1(value)) {
     return NAN;
   }
-  if (isObject$9(value)) {
+  if (isObject_1(value)) {
     var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-    value = isObject$9(other) ? (other + '') : other;
+    value = isObject_1(other) ? (other + '') : other;
   }
   if (typeof value != 'string') {
     return value === 0 ? value : +value;
@@ -1556,11 +1432,7 @@ function toNumber$1(value) {
     : (reIsBadHex.test(value) ? NAN : +value);
 }
 
-var toNumber_1 = toNumber$1;
-
-var isObject$7 = isObject_1;
-var now = now_1;
-var toNumber = toNumber_1;
+var toNumber_1 = toNumber;
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT$1 = 'Expected a function';
@@ -1623,7 +1495,7 @@ var nativeMin = Math.min;
  * // Cancel the trailing debounced invocation.
  * jQuery(window).on('popstate', debounced.cancel);
  */
-function debounce$1(func, wait, options) {
+function debounce(func, wait, options) {
   var lastArgs,
       lastThis,
       maxWait,
@@ -1638,11 +1510,11 @@ function debounce$1(func, wait, options) {
   if (typeof func != 'function') {
     throw new TypeError(FUNC_ERROR_TEXT$1);
   }
-  wait = toNumber(wait) || 0;
-  if (isObject$7(options)) {
+  wait = toNumber_1(wait) || 0;
+  if (isObject_1(options)) {
     leading = !!options.leading;
     maxing = 'maxWait' in options;
-    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+    maxWait = maxing ? nativeMax(toNumber_1(options.maxWait) || 0, wait) : maxWait;
     trailing = 'trailing' in options ? !!options.trailing : trailing;
   }
 
@@ -1685,7 +1557,7 @@ function debounce$1(func, wait, options) {
   }
 
   function timerExpired() {
-    var time = now();
+    var time = now_1();
     if (shouldInvoke(time)) {
       return trailingEdge(time);
     }
@@ -1714,11 +1586,11 @@ function debounce$1(func, wait, options) {
   }
 
   function flush() {
-    return timerId === undefined ? result : trailingEdge(now());
+    return timerId === undefined ? result : trailingEdge(now_1());
   }
 
   function debounced() {
-    var time = now(),
+    var time = now_1(),
         isInvoking = shouldInvoke(time);
 
     lastArgs = arguments;
@@ -1745,10 +1617,7 @@ function debounce$1(func, wait, options) {
   return debounced;
 }
 
-var debounce_1 = debounce$1;
-
-var debounce = debounce_1;
-var isObject$6 = isObject_1;
+var debounce_1 = debounce;
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT = 'Expected a function';
@@ -1804,11 +1673,11 @@ function throttle(func, wait, options) {
   if (typeof func != 'function') {
     throw new TypeError(FUNC_ERROR_TEXT);
   }
-  if (isObject$6(options)) {
+  if (isObject_1(options)) {
     leading = 'leading' in options ? !!options.leading : leading;
     trailing = 'trailing' in options ? !!options.trailing : trailing;
   }
-  return debounce(func, wait, {
+  return debounce_1(func, wait, {
     'leading': leading,
     'maxWait': wait,
     'trailing': trailing
@@ -1888,7 +1757,7 @@ var AcoruCollection = function () {
       var prop = this.parentAxis === 'vertical' ? 'height' : 'width';
       _Object$assign(this.target.style, (_Object$assign2 = {
         display: ''
-      }, _defineProperty(_Object$assign2, prop, 0), _defineProperty(_Object$assign2, 'overflow', 'hidden'), _defineProperty(_Object$assign2, 'webkitTransition', '.2s linear'), _defineProperty(_Object$assign2, 'transition', '.2s linear'), _defineProperty(_Object$assign2, 'webkitTransitionProperty', '' + prop), _defineProperty(_Object$assign2, 'transitionProperty', '' + prop), _Object$assign2));
+      }, _defineProperty$1(_Object$assign2, prop, 0), _defineProperty$1(_Object$assign2, 'overflow', 'hidden'), _defineProperty$1(_Object$assign2, 'webkitTransition', '.2s linear'), _defineProperty$1(_Object$assign2, 'transition', '.2s linear'), _defineProperty$1(_Object$assign2, 'webkitTransitionProperty', '' + prop), _defineProperty$1(_Object$assign2, 'transitionProperty', '' + prop), _Object$assign2));
 
       if (this.parentPosition === 'static') {
         this.parent.style.position = 'relative';
@@ -2038,18 +1907,17 @@ var AcoruCollection = function () {
         var prop = _this3.parentAxis === 'vertical' ? 'height' : 'width';
         var activeCollection = _this3.getActiveSiblingCollection();
         if (_this3.parentOverflow === 'hidden') {
-
           if (_this3.parentMode === 'single' && activeCollection !== null) {
             activeCollection.close();
           }
 
           setTimeout(function () {
-            _Object$assign(_this3.target.style, _defineProperty({
+            _Object$assign(_this3.target.style, _defineProperty$1({
               overflow: 'auto'
             }, prop, _this3.calcSize(activeCollection) + 'px'));
           }, 0);
         } else {
-          _Object$assign(_this3.target.style, _defineProperty({}, prop, _this3.calcSize(activeCollection) + 'px'));
+          _Object$assign(_this3.target.style, _defineProperty$1({}, prop, _this3.calcSize(activeCollection) + 'px'));
         }
 
         _this3.root.classList.add('acoru-opened');
@@ -2068,7 +1936,7 @@ var AcoruCollection = function () {
 
       setTimeout(function () {
         var prop = _this4.parentAxis === 'vertical' ? 'height' : 'width';
-        _Object$assign(_this4.target.style, _defineProperty({
+        _Object$assign(_this4.target.style, _defineProperty$1({
           overflow: 'hidden'
         }, prop, _this4.rootSize + 'px'));
 
@@ -2160,7 +2028,7 @@ var AcoruCollection = function () {
   return AcoruCollection;
 }();
 
-var Acoru = function () {
+var Acoru$1 = function () {
   function Acoru() {
     var _this = this;
 
@@ -2274,7 +2142,7 @@ var Acoru = function () {
     key: 'on',
     value: function on(type, func) {
       if (typeof func !== 'function') {
-        throw new Error('Required function');
+        throw new TypeError('Required function');
       }
 
       if (!this.__event[type]) {
@@ -2300,6 +2168,8 @@ var Acoru = function () {
   return Acoru;
 }();
 
-return Acoru;
+return Acoru$1;
 
 }());
+
+//# sourceMappingURL=acoru.js.map

@@ -1,4 +1,4 @@
-import Acoru from '../../lib';
+import Acoru from '../../dist/acoru.es.js';
 
 (() => {
   const acoru1 = new Acoru(document.getElementById('vertical'));

@@ -66,6 +66,7 @@ Temporary Items
 /dist/**
 !/dist/.gitkeep
 !/dist/acoru.js
+!/dist/acoru.js.map
 !/dist/acoru.min.js
-/lib/style.css*
-/lib/class-name.json
+!/dist/acoru.min.js.map
+/lib/styles/*

@@ -1,18 +1,55 @@
 {
   "name": "acoru",
+  "description": "To make an accordion UI",
   "version": "0.0.1",
-  "description": "",
-  "main": "dist/acoru.umd.js",
-  "jsnext:main": "dist/acoru.es.js",
-  "scripts": {
-    "start": "node dev-server.js",
-    "prepublish": "yarn prod",
-    "preprod": "mkdir -p dist; NODE_ENV='production' node prod.js",
-    "prod": "babili dist/acoru.js --no-comments --minified -o dist/acoru.min.js",
-    "_test": "xo && ava",
-    "test": "xo"
+  "author": "nju33 <nju33.ki@gmail.echo>",
+  "ava": {
+    "files": [
+      "test/specs/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
   },
-  "repository": "nju33/acoru",
+  "bugs": "https://github.com/nju33/acoru/issues",
+  "dependencies": {
+    "closest": "^0.0.1",
+    "custom-event": "^1.0.1"
+  },
+  "devDependencies": {
+    "@nju33/less": "^0.0.2",
+    "@nju33/postcss-preset": "^0.0.3",
+    "@nju33/rollup-preset": "^0.0.1",
+    "aru": "^0.0.2",
+    "ava": "^0.18.2",
+    "babel-eslint": "^7.2.1",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-class-properties": "^6.23.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.3.2",
+    "babel-register": "^6.24.0",
+    "beeper": "^1.1.1",
+    "browser-sync": "^2.18.8",
+    "chokidar": "^1.6.1",
+    "concurrently": "^3.4.0",
+    "lodash": "^4.17.4",
+    "meow": "^3.7.0",
+    "nightmare": "^2.10.0",
+    "nullpo": "^0.0.2",
+    "ora": "^1.2.0",
+    "p-pipe": "^1.0.0",
+    "pify": "^2.3.0",
+    "poipoi": "^0.0.1",
+    "postcss": "^5.2.16",
+    "pretty-error": "^2.0.3",
+    "rollup": "^0.41.6",
+    "xo": "^0.18.1"
+  },
+  "homepage": "https://github.com/nju33/acoru#readme",
+  "jsnext:main": "dist/acoru.es.js",
   "keywords": [
     "ui",
     "browser",
@@ -21,63 +58,34 @@
     "accordion",
     "ui"
   ],
-  "author": "nju33 <nju33.ki@gmail.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nju33/acoru/issues"
-  },
-  "homepage": "https://github.com/nju33/acoru#readme",
+  "main": "dist/acoru.umd.js",
+  "module": "dist/acoru.es.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "autoprefixer": "^6.5.3",
-    "ava": "^0.17.0",
-    "babel-eslint": "6",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-transform-class-properties": "^6.19.0",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^0.0.9",
-    "babili": "^0.0.9",
-    "browser-sync": "^2.18.2",
-    "casual": "^1.5.11",
-    "cssnano": "^3.8.1",
-    "gulp": "^3.9.1",
-    "gulp-less": "^3.3.0",
-    "gulp-postcss": "^6.2.0",
-    "nightmare": "^2.8.1",
-    "postcss-easings": "^0.3.0",
-    "postcss-modules": "^0.5.2",
-    "rollup": "^0.36.4",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-commonjs": "^7.0.0",
-    "rollup-plugin-json": "^2.0.2",
-    "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-replace": "^1.1.1",
-    "rollup-plugin-string": "^2.0.2",
-    "rollup-plugin-svelte": "^1.0.0",
-    "xo": "^0.17.1"
-  },
-  "ava": {
-    "files": [
-      "test/specs/*.js"
-    ]
+  "repository": "nju33/acoru",
+  "scripts": {
+    "build": "NODE_ENV=dev node -r babel-register task.config.js build",
+    "build:umd": "NODE_ENV=prod node -r babel-register task.config.js build --beep --format umd",
+    "build:es": "NODE_ENV=prod node -r babel-register task.config.js build --beep --format es",
+    "build:prod": "NODE_ENV=prod node -r babel-register task.config.js build",
+    "build:all": "concurrently 'yarn build' 'yarn build:prod'",
+    "dev": "NODE_ENV=dev node -r babel-register task.config.js dev --beep",
+    "dev:browser": "NODE_ENV=dev node -r babel-register task.config.js dev --beep",
+    "prepublish": "yarn build:all",
+    "test": "yarn test:xo && yarn test:ava",
+    "pretest:ava": "yarn build:umd",
+    "test:ava": "ava",
+    "test:ava:watch": "ava -w",
+    "test:xo": "xo {lib,tasks,test}/**/*.js task.config.js"
   },
   "xo": {
     "env": [
       "node",
       "browser"
     ],
-    "files": [
-      "example/**/*.js",
-      "src/**/*.js"
-    ],
-    "esnext": true,
     "space": 2,
-    "ignores": [
-      "es/**"
-    ],
     "parser": "babel-eslint",
     "overrides": [
       {
@@ -86,12 +94,13 @@
         "globals": [
           "acoru"
         ]
+      },
+      {
+        "files": "example/webpack/index.js",
+        "rules": {
+          "import/no-unresolved": "off"
+        }
       }
     ]
-  },
-  "dependencies": {
-    "closest": "^0.0.1",
-    "custom-event": "^1.0.1",
-    "lodash": "^4.17.4"
   }
 }
