@@ -28,6 +28,8 @@ Then, download the latest version.
 if you read as a separate file.
 
 ```html
+<script src="https://unpkg.com/acoru/dist/acoru.js"></script>
+<!-- or -->
 <script src="/path/tp/acoru.js"></script>
 ```
 
