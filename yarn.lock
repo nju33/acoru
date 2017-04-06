@@ -5154,6 +5154,10 @@ p-pipe@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-pipe/-/p-pipe-1.0.0.tgz#acd16e38fbed8e94d5b9bc6fb79759a39fe481d2"
 
+p-reduce@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/p-reduce/-/p-reduce-1.0.0.tgz#18c2b0dd936a4690a529f8231f58a0fdb6a47dfa"
+
 package-hash@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/package-hash/-/package-hash-1.2.0.tgz#003e56cd57b736a6ed6114cc2b81542672770e44"
